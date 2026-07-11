@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kronika Loucký mlýn - Staré Hobzí</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Georgia, serif;
+      background: linear-gradient(135deg, #3d2817 0%, #2a1810 100%);
+      color: #2c1810;
+      line-height: 1.7;
+    }
+    .container { max-width: 700px; margin: 20px auto; padding: 0 15px; }
+    .header {
+      background: #e8d4c4;
+      padding: 30px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      font-size: 2.5em;
+      color: #8b4513;
+      margin-bottom: 10px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    .header p {
+      color: #8b6f47;
+      font-size: 0.95em;
+    }
+    .nav {
+      display: flex;
+      gap: 15px;
+      margin: 30px 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .nav a {
+      padding: 12px 20px;
+      background: #c4a882;
+      color: #2c1810;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.9em;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+    .nav a:hover {
+      background: #b8956a;
+      border-color: #8b4513;
+      transform: translateY(-2px);
+    }
+    .nav a.active {
+      background: #8b4513;
+      color: #e8d4c4;
+      font-weight: bold;
+    }
+    .section {
+      background: #e8d4c4;
+      padding: 30px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+    .section.active { display: block; }
+    .section h2 {
+      color: #8b4513;
+      margin-bottom: 20px;
+      font-size: 1.8em;
+      border-bottom: 3px solid #8b4513;
+      padding-bottom: 10px;
+    }
+    .section h3 {
+      color: #8b4513;
+      margin-top: 20px;
+      margin-bottom: 12px;
+      font-size: 1.2em;
+    }
+    .prompt-box {
+      background: #f5f1ed;
+      padding: 15px;
+      border-left: 4px solid #8b4513;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .prompt-box textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #c4a882;
+      border-radius: 4px;
+      font-family: Arial, sans-serif;
+      font-size: 0.9em;
+      min-height: 80px;
+      resize: vertical;
+    }
+    .btn {
+      background: #8b4513;
+      color: #e8d4c4;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95em;
+      cursor: pointer;
+      margin: 10px 5px 10px 0;
+      transition: all 0.3s;
+      font-weight: bold;
+    }
+    .btn:hover {
+      background: #a0522d;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled {
+      background: #999;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-secondary {
+      background: #c4a882;
+      color: #2c1810;
+    }
+    .btn-secondary:hover { background: #b8956a; }
+    .output-box {
+      background: #f5f1ed;
+      padding: 20px;
+      border-radius: 6px;
+      margin-top: 20px;
+      min-height: 100px;
+      line-height: 1.8;
+      color: #2c1810;
+      border: 1px solid #c4a882;
+    }
+    .placeholder {
+      color: #999;
+      font-style: italic;
+    }
+    .timeline {
+      position: relative;
+      padding-left: 30px;
+    }
+    .timeline-item {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-left: 3px solid #8b4513;
+      padding-left: 20px;
+    }
+    .timeline-item:last-child { border-left: 3px solid #c4a882; }
+    .timeline-year {
+      font-weight: bold;
+      color: #8b4513;
+      font-size: 1.1em;
+    }
+    .find-item {
+      background: #f5f1ed;
+      padding: 15px;
+      margin: 12px 0;
+      border-radius: 4px;
+      border-left: 4px solid #8b4513;
+    }
+    .find-name {
+      font-weight: bold;
+      color: #8b4513;
+      margin-bottom: 5px;
+    }
+    .find-desc {
+      font-size: 0.9em;
+      color: #2c1810;
+    }
+    .loading {
+      display: inline-block;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Kronika Loucký mlýn</h1>
+    <p>BRUCKMÜHLE · STARÉ HOBZÍ · ZAL. PŘED R. 1190 · Č.P. 73</p>
+  </div>
+
+  <div class="nav">
+    <a href="#" onclick="showSection('timeline')" class="nav-btn active">ČASOVÁ OSA</a>
+    <a href="#" onclick="showSection('finds')" class="nav-btn">NÁLEZY</a>
+    <a href="#" onclick="showSection('historian')" class="nav-btn">AI HISTORIK</a>
+    <a href="#" onclick="showSection('photos')" class="nav-btn">FOTOGRAFIE</a>
+    <a href="#" onclick="showSection('chronicle')" class="nav-btn">KRONIKA</a>
+    <a href="#" onclick="showSection('notes')" class="nav-btn">POZNÁMKY</a>
+    <a href="#" onclick="showSection('archives')" class="nav-btn">ARCHIVY</a>
+  </div>
+
+  <!-- ČASOVÁ OSA -->
+  <div id="timeline" class="section active">
+    <h2>Časová osa</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-year">Před r. 1190</div>
+        <p>Založení mlýna jako součásti hospodářství okolních měšťanů. Původní německý název Bruckmühle (Mosty-mlýn) zřejmě vztahuje k dřevěným mostům přes Dyji.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1190 - 1400</div>
+        <p>Mlýn patří k majetku Louckého kláštera (Premonstrátenským kanovníkům). Postupně se stává jedním z důležitých hospodářských zařízení v okolí.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1425</div>
+        <p>Husitské konfiskace. Klášter a jeho majetek (včetně mlýna) jsou postiženy násilnými změnami během husitské revoluce.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1600 - 1700</div>
+        <p>Barokní období. Mlýn funguje jako součást klášterního hospodářství. Pravděpodobně v této době vzniká tzv. černá kuchyně.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1784</div>
+        <p>Josefínské zrušení kláštera. Loucky klášter je rozpuštěn. Mlýn pravděpodobně zůstává v majetku církve, postupně však přechází do soukromých rukou.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1805</div>
+        <p>Příslušníci Napoleonovy armády během jejich přechodu Moravou. Zdá se, že v okolí (Holešice) se setkáme se zmínkami o jeho noci.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1824</div>
+        <p>Císařský katastrální průzkum. V mapách je mlýn zaznamenán pod německým jménem Bruckmühle. Hranice Čech a Moravy vede přes pozemek.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1880 - 1950</div>
+        <p>Záhadná ruina severu od mlýna (viditelná na starých topografických mapách) postupně mizí. Její původní účel zůstává nejasný.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">Současnost</div>
+        <p>Mlýn je předmětem historického výzkumu. Archiální analýza a terénní prospekce odhalují vrstvy jeho složité minulosti.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- NÁLEZY -->
+  <div id="finds" class="section">
+    <h2>Nálezy z výzkumu</h2>
+    <div class="find-item">
+      <div class="find-name">🔶 Bronzový přívěsek</div>
+      <div class="find-desc">Pravděpodobně poutní medailon (16.–18. stol.). Nález vypovídá o spirituální dimenzi života v mlýně a okolí. Typický pro poutníky směřující na posvátná místa (např. Montserrat).</div>
+    </div>
+    <div class="find-item">
+      <div class="find-name">🔨 Podkovka</div>
+      <div class="find-desc">Železná podkovka, zkorodovaná. Svědčí o chovu zvířat a jejich využívání při mlýnských operacích.</div>
+    </div>
+    <div class="find-item">
+      <div class="find-name">📿 Vyrytý kámen</div>
+      <div class="find-desc">Kamenný fragment s rytinou. Pravděpodobně votivní nebo hraniční kamen. Účel a datace vyžadují další odborný rozbor.</div>
+    </div>
+    <div class="find-item">
+      <div class="find-name">🦴 Vyzídané kostní fragmenty</div>
+      <div class="find-desc">Objev u kamenného oblouku. Zdá se, že jde o depotní praxi spojovanou s "černou kuchyní" (černá kuchyně = rituální pokladištění pod stavbou). Takové praktiky jsou doloženy v evropské archeologické literatuře 17.–18. stol.</div>
+    </div>
+    <div class="find-item">
+      <div class="find-name">🔩 Zcela korodovaný trubkový prvek</div>
+      <div class="find-desc">Železná součást potrubí nebo konstrukčního prvku. Datace nejasná, zřejmě novější (19.–20. stol.).</div>
+    </div>
+  </div>
+
+  <!-- AI HISTORIK -->
+  <div id="historian" class="section">
+    <h2>AI historický asistent</h2>
+    <p style="margin-bottom: 20px; font-style: italic; color: #666;">Zeptej se na historii mlýna, lidové tradice, archivní zdroje nebo interpretaci nálezů. Odpovědi se ukládají do Poznámek.</p>
+    
+    <div class="prompt-box">
+      <label for="historianQuery" style="display: block; margin-bottom: 10px; font-weight: bold;">Tvá otázka:</label>
+      <textarea id="historianQuery" placeholder="Např.: Jaká byla role Černé kuchyně v mlýnské budově? Nebo: Co znamená nalezený bronzový přívěsek?"></textarea>
+    </div>
+    
+    <button class="btn" id="askBtn" onclick="askHistorian()">❓ Zeptat se</button>
+    <button class="btn btn-secondary" onclick="clearHistorianResponse()">🗑️ Vymazat odpověď</button>
+    
+    <div id="historianBox" class="output-box">
+      <span class="placeholder">Zde se zobrazí odpověď historika...</span>
+    </div>
+  </div>
+
+  <!-- FOTOGRAFIE -->
+  <div id="photos" class="section">
+    <h2>Fotografie</h2>
+    <p style="margin-bottom: 20px;">Sekce pro fotografie z terénního výzkumu. (V přípravě)</p>
+  </div>
+
+  <!-- KRONIKA -->
+  <div id="chronicle" class="section">
+    <h2>Kronika mlýna</h2>
+    <p style="margin-bottom: 20px; font-style: italic; color: #666;">Na základě archivních zdrojů a nálezů vzniká živá kronika. Vygeneruj ji z poznamenaných podkladů.</p>
+    
+    <button class="btn" id="genBtn" onclick="generateChronicle()">✍️ Generovat / Aktualizovat kroniku</button>
+    <button class="btn btn-secondary" onclick="copyChronicle()">📋 Zkopírovat</button>
+    
+    <div id="chronicleBox" class="output-box">
+      <span class="placeholder">Kronika se bude tvořit na základě archivních podkladů a terénních objevů...</span>
+    </div>
+  </div>
+
+  <!-- POZNÁMKY -->
+  <div id="notes" class="section">
+    <h2>Poznámky z výzkumu</h2>
+    <p style="margin-bottom: 20px;">Prostor pro volné poznámky a myšlenky z výzkumu.</p>
+    
+    <div class="prompt-box">
+      <label for="notesArea" style="display: block; margin-bottom: 10px; font-weight: bold;">Tvé poznámky:</label>
+      <textarea id="notesArea" placeholder="Piš si poznámky z výzkumu, hypotézy, nápady..."></textarea>
+    </div>
+    
+    <button class="btn" onclick="saveNotes()">💾 Uložit poznámky</button>
+    <button class="btn btn-secondary" onclick="clearNotes()">🗑️ Vymazat</button>
+    
+    <div id="notesBox" class="output-box">
+      <span class="placeholder">Tvé poznámky se budou ukládat sem...</span>
+    </div>
+  </div>
+
+  <!-- ARCHIVY -->
+  <div id="archives" class="section">
+    <h2>Archivní zdroje</h2>
+    <h3>MZA Brno - Archiv Louckého kláštera</h3>
+    <p>Fond E 57 - Louka Monastery collection (1190-1950s)</p>
+    
+    <h3>ČÚZK - Státní archiv map</h3>
+    <p>Císařský katastrální průzkum (1824) - mapa Staré Hobzí<br/>
+    Dostupné na: <a href="https://ags.cuzk.cz/archiv" target="_blank" style="color: #8b4513; text-decoration: underline;">ags.cuzk.cz/archiv</a></p>
+    
+    <h3>Vojenské topografické mapy</h3>
+    <p>Австро-венгерский генеральный штаб (1880-1950)<br/>
+    Dostupné na: <a href="https://mapire.eu" target="_blank" style="color: #8b4513; text-decoration: underline;">mapire.eu</a></p>
+    
+    <h3>Mapy.cz - Historické mapy</h3>
+    <p>Ortofoto a topografické mapy s vrstvami<br/>
+    Dostupné na: <a href="https://mapy.cz" target="_blank" style="color: #8b4513; text-decoration: underline;">mapy.cz</a></p>
+  </div>
+
+</div>
+
+<script>
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+async function askHistorian() {
+  const query = document.getElementById('historianQuery').value.trim();
+  if (!query) {
+    alert('Prosím, napiš svou otázku.');
+    return;
+  }
+
+  const btn = document.getElementById('askBtn');
+  const box = document.getElementById('historianBox');
+  
+  btn.disabled = true;
+  btn.textContent = '⏳ Zpracovávám...';
+  box.textContent = '';
+  box.innerHTML = '<span class="loading">Historik přemýšlí...</span>';
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1500,
+        system: `Jsi historik specialista na českou lokální historii a klášterní hospodářství. 
+Odpovídáš na otázky o Louckom klášteře, Louckém mlýně (Bruckmühle) ve Starém Hobzí a její historii.
+Piš věcně, ale s citlivostí k místní kultuře. Odkazuj na relevantní archivní fondy a archeologické nálezy.
+Pokud něco nevíš jistě, řekni to otevřeně.`,
+        messages: [{
+          role: 'user',
+          content: query
+        }]
+      })
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const text = data?.content?.[0]?.text || 'Historik se nemohl vyjádřit.';
+    
+    box.textContent = text;
+    localStorage.setItem('historian-response', text);
+    localStorage.setItem('historian-query', query);
+  } catch (e) {
+    console.error('Historian error:', e);
+    box.innerHTML = '<span class="placeholder">❌ Chyba připojení. Zkus to znovu. (Chyba: ' + e.message + ')</span>';
+  }
+
+  btn.disabled = false;
+  btn.textContent = '❓ Zeptat se';
+}
+
+function clearHistorianResponse() {
+  document.getElementById('historianBox').innerHTML = '<span class="placeholder">Zde se zobrazí odpověď historika...</span>';
+  localStorage.removeItem('historian-response');
+  localStorage.removeItem('historian-query');
+}
+
+async function generateChronicle() {
+  const btn = document.getElementById('genBtn');
+  const box = document.getElementById('chronicleBox');
+
+  const notes = document.getElementById('notesArea').value || 'Žádné vlastní poznámky nejsou k dispozici.';
+  
+  btn.disabled = true;
+  btn.textContent = '⏳ Píšu kroniku...';
+  box.textContent = '';
+  box.innerHTML = '<span class="loading">Kronikář píše...</span>';
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 2000,
+        system: `Jsi kronikář. Na základě podkladů — výzkumných poznámek, archivních nálezů, místní tradice — píšeš živou, čtivou kroniku Louckého mlýna (Bruckmühle) ve Starém Hobzí.
+Piš v češtině, v kronikářském stylu — věcně, ale s atmosférou. Zachovej chronologický přehled tam, kde to dává smysl.
+Nevymýšlej fakta, která nejsou v podkladech — pokud něco není jisté, naznač to slovy "pravděpodobně", "zdá se" apod.
+Výstup je čistý text kroniky, bez nadpisů, bez odrážek — plynulé odstavce. Piš jako stará kronika místního historika.`,
+        messages: [{
+          role: 'user',
+          content: `Zde jsou výzkumné podklady k mlýnu:\n\n${notes}\n\nNapiš z toho kroniku mlýna.`
+        }]
+      })
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+
+    const data = await res.json();
+    const text = data?.content?.[0]?.text || 'Kroniku se nepodařilo vygenerovat.';
+    box.textContent = text;
+    localStorage.setItem('loucky-chronicle', text);
+  } catch (e) {
+    console.error('Chronicle error:', e);
+    box.innerHTML = '<span class="placeholder">❌ Chyba připojení. Zkus to znovu. (' + e.message + ')</span>';
+  }
+
+  btn.disabled = false;
+  btn.textContent = '✍️ Generovat / Aktualizovat kroniku';
+}
+
+function copyChronicle() {
+  const text = document.getElementById('chronicleBox').textContent;
+  if (text.includes('Zde se zobrazí') || text.includes('Kroniku se')) {
+    alert('Nejdřív vygeneruj kroniku!');
+    return;
+  }
+  navigator.clipboard.writeText(text).then(() => alert('Kronika zkopírována do schránky.')).catch(() => alert('Chyba při kopírování.'));
+}
+
+function saveNotes() {
+  const text = document.getElementById('notesArea').value;
+  localStorage.setItem('research-notes', text);
+  document.getElementById('notesBox').textContent = text || '(Prázdné poznámky)';
+  alert('Poznámky uloženy!');
+}
+
+function clearNotes() {
+  if (confirm('Opravdu vymazat poznámky?')) {
+    document.getElementById('notesArea').value = '';
+    document.getElementById('notesBox').textContent = '';
+    localStorage.removeItem('research-notes');
+  }
+}
+
+// Load saved data on page load
+window.addEventListener('DOMContentLoaded', () => {
+  const notes = localStorage.getItem('research-notes');
+  if (notes) document.getElementById('notesArea').value = notes;
+
+  const chronicle = localStorage.getItem('loucky-chronicle');
+  if (chronicle) document.getElementById('chronicleBox').textContent = chronicle;
+
+  const historianResp = localStorage.getItem('historian-response');
+  if (historianResp) document.getElementById('historianBox').textContent = historianResp;
+});
+</script>
+
+</body>
+</html>
