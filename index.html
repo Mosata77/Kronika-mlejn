@@ -494,6 +494,13 @@ window.addEventListener('DOMContentLoaded', () => {
   if (historianResp) document.getElementById('historianBox').textContent = historianResp;
 });
 </script>
+<div style="margin: 20px; padding: 20px; background: #e8d4c4; border-radius: 8px;">
+  <h2>Nahrát fotografii</h2>
+  <input type="file" id="fileInput" accept="image/*">
+  <button onclick="uploadPhoto()">Nahrát</button>
 
+  <h2 style="margin-top: 20px;">Nahrané fotografie</h2>
+  <div id="photoList"></div>
+</div>
 </body>
 </html>
