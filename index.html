@@ -503,6 +503,39 @@ window.addEventListener('DOMContentLoaded', () => {
   <div id="photoList"></div>
 </div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+  const supabaseUrl = "https://egouapszfgroowjjnouq.supabase.co";
+  const supabaseKey = "sb_publishable_mb7XD2QZTI0QRabK7uJ1Ww_X_6Hq36t";
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+  async function uploadPhoto() {
+    const file = document.getElementById("fileInput").files[0];
+    if (!file) {
+      alert("Vyberte prosím soubor.");
+      return;
+    }
+
+    const fileName = Date.now() + "_" + file.name;
+
+    let { data, error } = await supabase.storage
+      .from("fotky")
+      .upload(fileName, file);
+
+    if (error) {
+      alert("Chyba při nahrávání: " + error.message);
+      return;
+    }
+
+    alert("Fotka byla úspěšně nahrána!");
+    loadPhotos();
+  }
+
+  async function loadPhotos() {
+    let { data: files, error } = await supabase.storage
+      .from("fotky")
+      .list("", { limit: 100 });
+
 </html>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script>
